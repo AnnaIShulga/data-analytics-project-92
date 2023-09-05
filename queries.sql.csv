@@ -1,2 +1,2 @@
-"customers_count"
-19759
+SELECT COUNT(customer_id) as customers_count
+from customers;
