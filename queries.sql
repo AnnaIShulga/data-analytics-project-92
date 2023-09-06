@@ -44,7 +44,7 @@ group by age_category
 select --данные по количеству уникальных покупателей и выручке, которую они принесли
 	to_char(s.sale_date, 'YYYY-MM') as date,
 	count(distinct s.customer_id) as total_customers,
-	round(sum(s.quantity * p.price),0)as income
+	ceiling(sum(s.quantity * p.price))as income
 from sales s
 left join products p on p.product_id = s.product_id
 group by to_char(s.sale_date, 'YYYY-MM')
@@ -55,9 +55,9 @@ select --покупатели первая покупка которых при�
 	sale_date,
 	seller
 from	(select 
-		concat(c.last_name,' ',c.first_name) as customer,
+		concat(c.first_name,' ',c.last_name) as customer,
 		s.sale_date as sale_date,
-		concat(e.last_name,' ',e.first_name) as seller,
+		concat(e.first_name,' ',e.last_name) as seller,
 		sum(s.quantity * p.price) as income,
 		c.customer_id as id,
 		row_number () over (partition by c.customer_id order by s.sale_date) as rn
@@ -65,7 +65,7 @@ from	(select
 		left join employees e on e.employee_id = s.sales_person_id
 		left join products p on p.product_id = s.product_id
 		left join customers c on c.customer_id = s.customer_id
-		group by concat(c.last_name,' ',c.first_name),s.sale_date,concat(e.last_name,' ',e.first_name),c.customer_id ) as total
+		group by concat(c.first_name,' ',c.last_name),s.sale_date,concat(e.first_name,' ',e.last_name),c.customer_id ) as total
 where rn = '1' and income = '0'
 order by id
 	
