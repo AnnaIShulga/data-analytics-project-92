@@ -22,15 +22,26 @@ group by CONCAT(e.first_name,' ', e.last_name)
 having ROUND(AVG(s.quantity * p.price),0) < (select avg(s.quantity * p.price) from sales s left join products p on p.product_id = s.product_id)
 order by average_income;
 
-select--отчет с данными по выручке по каждому продавцу и дню недели
-	CONCAT(e.first_name,' ', e.last_name) as name,
-	to_char(s.sale_date, 'day') as weekday,
-	floor(sum(s.quantity * p.price)) as income
+with tab as --отчет с данными по выручке по каждому продавцу и дню недели
+(select
+s.sale_date as sale_date,
+CONCAT(e.first_name,' ', e.last_name) as name,
+sum(s.quantity * p.price) as income,
+to_char(sale_date, 'day') as weekday,
+case when to_char(sale_date, 'day')= 'monday   ' then '1'
+ 	 when to_char(sale_date, 'day')= 'tuesday  ' then '2'
+ 	 when to_char(sale_date, 'day')= 'wednesday' then '3' 
+	 when to_char(sale_date, 'day')= 'thursday ' then '4' 
+	 when to_char(sale_date, 'day')= 'friday   ' then '5' 
+	 when to_char(sale_date, 'day')= 'saturday ' then '6' 
+	 when to_char(sale_date, 'day')= 'sunday   ' then '7'
+else 0
+end as rn
 from sales s
 left join employees e on e.employee_id = s.sales_person_id
 left join products p on p.product_id = s.product_id
-group by CONCAT(e.first_name,' ', e.last_name), s.sale_date
-order by to_char(s.sale_date,'d'), name;
+group by s.sale_date, CONCAT(e.first_name,' ', e.last_name)
+order by to_char(sale_date, 'id'), name)
 
 select case when age > '16' and age <='25' then '16-25' --количество покупателей в разных возрастных группах: 16-25, 26-40 и 40+
 			when age >='26' and age <='40' then '26-40'
